@@ -189,6 +189,34 @@ GraspDetector::GraspDetector(const std::string &config_filename) {
                                           hand_search_params.num_orientations_);
 }
 
+extern "C" struct Grasp {
+  double *pos;
+  double *orient;
+  double *sample;
+  double score;
+  bool label;
+  int *image;
+};
+
+Grasp *handsToGraspsStruct(std::vector<std::unique_ptr<candidate::Hand>> &hands) {
+  Grasp *grasps = new Grasp[hands.size()];
+
+  for (int i = 0; i < hands.size(); i++) {
+    grasps[i].pos = new double[3];
+    Eigen::Map<Eigen::Vector3d>(grasps[i].pos) = hands[i]->getPosition();
+    grasps[i].orient = new double[4];
+    Eigen::Quaterniond q(hands[i]->getFrame());
+    Eigen::Map<Eigen::Quaterniond>(grasps[i].orient) = q;
+    grasps[i].sample = new double[3];
+    grasps[i].score = hands[i]->getScore();
+    grasps[i].label = hands[i]->isFullAntipodal();
+    grasps[i].image = new int[0];
+    grasps[i].image[0] = -1;
+  }
+
+  return grasps;
+}
+
 std::vector<std::unique_ptr<candidate::Hand>> GraspDetector::detectGrasps(
     const util::Cloud &cloud) {
   double t0_total = omp_get_wtime();
@@ -279,6 +307,24 @@ std::vector<std::unique_ptr<candidate::Hand>> GraspDetector::detectGrasps(
                             hand_geom);
   }
 
+  std::string filename = "/grasps.txt";
+  std::ofstream myfile;
+  myfile.open(filename.c_str());
+
+  Grasp *gstruct = handsToGraspsStruct(hands);
+  for (int i = 0; i < hands.size(); i++) {
+    std::cout << "Grasp " << i << std::endl;
+    myfile << std::to_string(gstruct[i].pos[0]) + "," + std::to_string(gstruct[i].pos[1]) + "," + std::to_string(gstruct[i].pos[2]) + ","
+           << std::to_string(gstruct[i].orient[0]) + "," + std::to_string(gstruct[i].orient[1]) + "," + std::to_string(gstruct[i].orient[2]) + "," + std::to_string(gstruct[i].orient[3]) + "," 
+           << std::to_string(gstruct[i].score) << ","
+           << std::to_string(hands[i]->getBinormal()[0]) << "," << std::to_string(hands[i]->getBinormal()[1]) << "," << std::to_string(hands[i]->getBinormal()[2]) << ","
+           << std::to_string(hands[i]->getApproach()[0]) << "," << std::to_string(hands[i]->getApproach()[1]) << "," << std::to_string(hands[i]->getApproach()[2])
+           << "\n";
+  }
+
+  myfile.close();
+
+
   // 6. Cluster the grasps.
   double t0_cluster = omp_get_wtime();
   std::vector<std::unique_ptr<candidate::Hand>> clusters;
@@ -323,7 +369,6 @@ std::vector<std::unique_ptr<candidate::Hand>> GraspDetector::detectGrasps(
     plotter_->plotFingers3D(clusters, cloud.getCloudOriginal(),
                             "Selected Grasps", hand_geom, false);
   }
-
   return clusters;
 }
 
