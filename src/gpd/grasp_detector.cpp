@@ -307,7 +307,7 @@ std::vector<std::unique_ptr<candidate::Hand>> GraspDetector::detectGrasps(
                             hand_geom);
   }
 
-  std::string filename = "/grasps.txt";
+  std::string filename = "/workspace/cache/handpose.txt";
   std::ofstream myfile;
   myfile.open(filename.c_str());
 
