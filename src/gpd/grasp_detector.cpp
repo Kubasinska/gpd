@@ -324,6 +324,8 @@ std::vector<std::unique_ptr<candidate::Hand>> GraspDetector::detectGrasps(
 
   myfile.close();
 
+printf("Pose saved in /workspace/cache/handpose.txt\n");
+
 
   // 6. Cluster the grasps.
   double t0_cluster = omp_get_wtime();
@@ -369,6 +371,27 @@ std::vector<std::unique_ptr<candidate::Hand>> GraspDetector::detectGrasps(
     plotter_->plotFingers3D(clusters, cloud.getCloudOriginal(),
                             "Selected Grasps", hand_geom, false);
   }
+
+  std::string filename = "/workspace/cache/handpose2.txt";
+  std::ofstream myfile;
+  myfile.open(filename.c_str());
+
+  Grasp *gstruct = handsToGraspsStruct(clusters);
+  for (int i = 0; i < clusters.size(); i++) {
+    std::cout << "Grasp " << i << std::endl;
+    myfile << std::to_string(gstruct[i].pos[0]) + "," + std::to_string(gstruct[i].pos[1]) + "," + std::to_string(gstruct[i].pos[2]) + ","
+           << std::to_string(gstruct[i].orient[0]) + "," + std::to_string(gstruct[i].orient[1]) + "," + std::to_string(gstruct[i].orient[2]) + "," + std::to_string(gstruct[i].orient[3]) + "," 
+           << std::to_string(gstruct[i].score) << ","
+           << std::to_string(clusters[i]->getBinormal()[0]) << "," << std::to_string(clusters[i]->getBinormal()[1]) << "," << std::to_string(clusters[i]->getBinormal()[2]) << ","
+           << std::to_string(clusters[i]->getApproach()[0]) << "," << std::to_string(clusters[i]->getApproach()[1]) << "," << std::to_string(clusters[i]->getApproach()[2])
+           << "\n";
+  }
+
+  myfile.close();
+
+printf("Pose saved in /workspace/cache/handpose2.txt\n");
+
+
   return clusters;
 }
 
