@@ -372,22 +372,22 @@ printf("Pose saved in /workspace/cache/handpose.txt\n");
                             "Selected Grasps", hand_geom, false);
   }
 
-  std::string filename = "/workspace/cache/handpose2.txt";
-  std::ofstream myfile;
-  myfile.open(filename.c_str());
+  std::string filename2 = "/workspace/cache/handpose2.txt";
+  std::ofstream myfile2;
+  myfile2.open(filename2.c_str());
 
-  Grasp *gstruct = handsToGraspsStruct(clusters);
+  Grasp *gstruct2 = handsToGraspsStruct(clusters);
   for (int i = 0; i < clusters.size(); i++) {
     std::cout << "Grasp " << i << std::endl;
-    myfile << std::to_string(gstruct[i].pos[0]) + "," + std::to_string(gstruct[i].pos[1]) + "," + std::to_string(gstruct[i].pos[2]) + ","
-           << std::to_string(gstruct[i].orient[0]) + "," + std::to_string(gstruct[i].orient[1]) + "," + std::to_string(gstruct[i].orient[2]) + "," + std::to_string(gstruct[i].orient[3]) + "," 
-           << std::to_string(gstruct[i].score) << ","
+    myfile2 << std::to_string(gstruct2[i].pos[0]) + "," + std::to_string(gstruct2[i].pos[1]) + "," + std::to_string(gstruct2[i].pos[2]) + ","
+           << std::to_string(gstruct2[i].orient[0]) + "," + std::to_string(gstruct2[i].orient[1]) + "," + std::to_string(gstruct2[i].orient[2]) + "," + std::to_string(gstruct2[i].orient[3]) + "," 
+           << std::to_string(gstruct2[i].score) << ","
            << std::to_string(clusters[i]->getBinormal()[0]) << "," << std::to_string(clusters[i]->getBinormal()[1]) << "," << std::to_string(clusters[i]->getBinormal()[2]) << ","
            << std::to_string(clusters[i]->getApproach()[0]) << "," << std::to_string(clusters[i]->getApproach()[1]) << "," << std::to_string(clusters[i]->getApproach()[2])
            << "\n";
   }
 
-  myfile.close();
+  myfile2.close();
 
 printf("Pose saved in /workspace/cache/handpose2.txt\n");
 
